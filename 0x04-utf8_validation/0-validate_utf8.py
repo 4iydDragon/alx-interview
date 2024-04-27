@@ -1,25 +1,34 @@
 #!/usr/bin/python3
-"""method that determines if a given data set represents
-a valid UTF-8 encoding"""
+"""Module w/ function to determines if a dataset is a valid UTF-8 encoding"""
 
 
 def validUTF8(data):
-    n_bytes = 0
+    """Function that determines if a dataset is avalid UTF-8 encoding"""
 
-    for num in data:
-        binary = format(num, "#010b")[-8:]
-        if n_bytes == 0:
-            for bit in binary:
-                if bit == '0':
-                    break
-                n_bytes += 1
-            if n_bytes == 0:
+    remainingBytes = 0
+    bit7 = 1 << 7
+    bit6 = 1 << 6
+
+    for byte in data:
+        currentBit = 1 << 7
+
+        if remainingBytes == 0:
+            while byte & currentBit:
+                remainingBytes += 1
+                currentBit = currentBit >> 1
+
+            if remainingBytes == 0:
                 continue
-            if n_bytes == 1 or n_bytes > 4:
+
+            if remainingBytes == 1 or remainingBytes > 4:
                 return False
         else:
-            if binary[0] != '1' or binary[1] != '0':
+            if not (byte & bit7 and not (byte & bit6)):
                 return False
 
-        n_bytes -= 1
-    return n_bytes == 0
+        remainingBytes -= 1
+
+    if remainingBytes == 0:
+        return True
+
+    return False

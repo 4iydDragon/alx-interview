@@ -1,64 +1,69 @@
 #!/usr/bin/python3
-"""
-Module for N Queens.
-"""
-from sys import argv, exit
+"""Module with solution for the N-Queens challenge with backtracking"""
+import sys
 
 
-def solveNQueens(n):
-    """Program that places N non-attacking queens on an NxN chessboard"""
-    res = []
-    queens = [-1] * n
-    # index represents row no and value represents col no
+def chessboard(pos, n):
+    """Function to print chessboard with appropriate positions of queens"""
 
-    def fs(index):
-        """Recursively resolves the N queens problem"""
-        if index == len(queens):  # n queens have been placed correctly
-            res.append(queens[:])
-            return  # backtracking
-        for i in range(len(queens)):
-            queens[index] = i
-            if valid(index):  # pruning
-                fs(index + 1)
+    board = []
 
-    # check whether nth queens can be placed
-    def valid(n):
-        """Method that checks if a position in the board is valid"""
-        for i in range(n):
-            if abs(queens[i] - queens[n]) == n - i:  # same diagonal
-                return False
-            if queens[i] == queens[n]:  # same column
-                return False
+    for RANK in range(n):
+        for FILE in range(n):
+            if FILE == pos[RANK]:
+                board.append([RANK, FILE])
+
+    print(board)
+
+
+def safe_pos(pos, RANK, FILE, n):
+    """Function to determine safe a square to place a queen"""
+
+    if (pos[RANK] == FILE) or (pos[RANK] == FILE - RANK + n) or \
+            (pos[RANK] == RANK - n + FILE):
         return True
-
-    def make_all_boards(res):
-        """Method that builts the List that be returned"""
-        actual_boards = []
-        for queens in res:
-            board = []
-            for row, col in enumerate(queens):
-                board.append([row, col])
-            actual_boards.append(board)
-        return actual_boards
-
-    fs(0)
-    return make_all_boards(res)
+    return False
 
 
-if __name__ == "__main__":
-    if len(argv) < 2:
-        print('Usage: nqueens N')
-        exit(1)
-    try:
-        n = int(argv[1])
-    except ValueError:
-        print('N must be a number')
-        exit(1)
+def get_safe_pos(board, rank, n):
+    """Function to get all safe positions to place queens with recursion"""
 
-    if n < 4:
-        print('N must be at least 4')
-        exit(1)
+    if rank == n:
+        chessboard(board, n)
     else:
-        result = solveNQueens(n)
-        for row in result:
-            print(row)
+        for FILE in range(n):
+            safe = True
+
+            for RANK in range(rank):
+                if safe_pos(board, RANK, FILE, rank):
+                    safe = False
+
+            if safe:
+                board[rank] = FILE
+                get_safe_pos(board, rank + 1, n)
+
+
+def create_board(n):
+    """Function to generate chessboard of n-size"""
+
+    return [0 * n for i in range(n)]
+
+
+if len(sys.argv) != 2:
+    print("Usage: nqueens N")
+    exit(1)
+
+try:
+    n = int(sys.argv[1])
+except Exception:
+    print("N must be a number")
+    exit(1)
+
+if (n < 4):
+    print("N must be at least 4")
+    exit(1)
+
+
+board = create_board(int(n))
+rank = 0
+get_safe_pos(board, rank, int(n))

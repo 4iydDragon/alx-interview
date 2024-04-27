@@ -1,25 +1,17 @@
 #!/usr/bin/node
+
 const request = require('request');
 
-const movieId = process.argv[2];
-
-const baseUrl = 'https://swapi-api.hbtn.io/api/';
-
-request.get(`${baseUrl}films/${movieId}`, { json: true }, (err, res, body) => {
-  if (err) { return console.log(err); }
-  const result = body.characters;
-  // console.log(result);
-
-  actorsList(result);
+request('https://swapi-api.hbtn.io/api/films/' + process.argv[2], function (err, res, body) {
+  if (err) throw err;
+  const actors = JSON.parse(body).characters;
+  exactOrder(actors, 0);
 });
-
-function actorsList (result, i = 0) {
-  if (i === result.length) return;
-
-  request(result[i], { json: true }, (err, res, body) => {
-    if (err) { return console.log(err); }
-
-    console.log(body.name);
-    actorsList(result, i + 1);
+const exactOrder = (actors, x) => {
+  if (x === actors.length) return;
+  request(actors[x], function (err, res, body) {
+    if (err) throw err;
+    console.log(JSON.parse(body).name);
+    exactOrder(actors, x + 1);
   });
-}
+};
