@@ -1,40 +1,49 @@
 #!/usr/bin/python3
-"""Module containing script that reads stdin and computes metrics"""
+"""
+    script that reads stdin line by line and computes metrics
+"""
 import sys
 
-status_codes = {"200": 0, "301": 0, "400": 0, "401": 0,
-                "403": 0, "404": 0, "405": 0, "500": 0}
-total_size = 0
-total_num = 0
+
+def print_msg(codes, file_size):
+    print("File size: {}".format(file_size))
+    for key, val in sorted(codes.items()):
+        if val != 0:
+            print("{}: {}".format(key, val))
+
+
+file_size = 0
+code = 0
+count_lines = 0
+codes = {
+    "200": 0,
+    "301": 0,
+    "400": 0,
+    "401": 0,
+    "403": 0,
+    "404": 0,
+    "405": 0,
+    "500": 0
+}
 
 try:
     for line in sys.stdin:
-        lines = line.split(" ")
+        parsed_line = line.split()
+        parsed_line = parsed_line[::-1]
 
-        if len(lines) > 4:
-            code = lines[-2]
-            size = int(lines[-1])
+        if len(parsed_line) > 2:
+            count_lines += 1
 
-            if code in status_codes.keys():
-                status_codes[code] += 1
+            if count_lines <= 10:
+                file_size += int(parsed_line[0])
+                code = parsed_line[1]
 
-            total_size += size
-            total_num += 1
+                if (code in codes.keys()):
+                    codes[code] += 1
 
-        if total_num == 10:
-            total_num = 0
-            print("File size: {}".format(total_size))
-
-            for k, v in sorted(status_codes.items()):
-                if v != 0:
-                    print("{}: {}".format(k, v))
-
-except Exception:
-    pass
+            if (count_lines == 10):
+                print_msg(codes, file_size)
+                count_lines = 0
 
 finally:
-    print("File size: {}".format(total_size))
-
-    for k, v in sorted(status_codes.items()):
-        if v != 0:
-            print("{}: {}".format(k, v))
+    print_msg(codes, file_size)
